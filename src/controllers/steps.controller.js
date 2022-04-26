@@ -60,3 +60,29 @@ export const getStepsByUsername = async (req, res) => {
     res.send(error.message);
   }
 };
+
+export const updateStepsByUsername = async (req, res) => {
+  const { Distance, Steps, Calorias } = req.body;
+
+  // validating
+  if (Distance == null || Steps == null || Calorias == null) {
+    return res.status(400).json({ msg: "Bad Request. Please fill all fields" });
+  }
+
+  try {
+    const pool = await getConnection();
+    await pool
+      .request()
+      .input("Distance", sql.Float, Distance)
+      .input("Steps", sql.Float, Steps)
+      .input("Calorias", sql.Float, Calorias)
+      .input("userName", req.params.username)
+      .query(
+        "UPDATE Steps SET Distance=@Distance, Steps=@Steps, Calorias=@Calorias WHERE userName=@userName"
+      );
+    res.json({ Distance, Steps, Calorias });
+  } catch (error) {
+    res.status(500);
+    res.send(error.message);
+  }
+};
